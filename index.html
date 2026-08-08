@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMF Calculator — Intermittent Modified Fasting</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1a2027;
+    --muted: #5b6673;
+    --border: #dde2e8;
+    --accent: #2563eb;
+    --accent-soft: #eff4ff;
+    --rfl: #dc2626;
+    --rfl-soft: #fdeaea;
+    --maint: #16803c;
+    --maint-soft: #e8f6ec;
+    --warn-soft: #fff7e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181d;
+      --card: #1d232b;
+      --text: #e8ecf1;
+      --muted: #9aa5b1;
+      --border: #333c47;
+      --accent: #60a5fa;
+      --accent-soft: #1e2a40;
+      --rfl: #f87171;
+      --rfl-soft: #3a2224;
+      --maint: #4ade80;
+      --maint-soft: #1d3325;
+      --warn-soft: #33291a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  header h1 { margin: 8px 0 4px; font-size: 1.7rem; }
+  header p { margin: 0 0 20px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .card h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  .card h2 .tag {
+    font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+    vertical-align: 2px; margin-left: 6px;
+  }
+  .tag.rfl { background: var(--rfl-soft); color: var(--rfl); }
+  .tag.maint { background: var(--maint-soft); color: var(--maint); }
+  label { display: block; font-size: 0.82rem; font-weight: 600; margin: 12px 0 4px; }
+  label:first-of-type { margin-top: 0; }
+  .hint { font-weight: 400; color: var(--muted); }
+  input[type="number"], select {
+    width: 100%; padding: 8px 10px; font-size: 0.95rem;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .seg { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    flex: 1; padding: 7px 0; border: none; background: var(--bg); color: var(--muted);
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+  }
+  .seg button.active { background: var(--accent); color: #fff; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.85rem; }
+  .check input { width: auto; }
+  .stat-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
+  .stat {
+    flex: 1 1 120px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+  }
+  .stat .v { font-size: 1.25rem; font-weight: 700; }
+  .stat .l { font-size: 0.75rem; color: var(--muted); }
+  .stat.big { background: var(--accent-soft); border-color: transparent; }
+  .macro-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 8px; }
+  .macro-table th, .macro-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .macro-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .macro-table tr:last-child td { border-bottom: none; }
+  .note { font-size: 0.82rem; color: var(--muted); margin: 10px 0 0; }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+  .day {
+    border-radius: 8px; padding: 8px 4px; text-align: center; font-size: 0.78rem; font-weight: 600;
+  }
+  .day .dn { display: block; font-size: 0.68rem; font-weight: 400; opacity: 0.75; margin-bottom: 2px; }
+  .day.rfl { background: var(--rfl-soft); color: var(--rfl); }
+  .day.maint { background: var(--maint-soft); color: var(--maint); }
+  .disclaimer {
+    margin-top: 20px; padding: 12px 14px; background: var(--warn-soft);
+    border-radius: 10px; font-size: 0.8rem; color: var(--muted);
+  }
+  .results-stack { display: flex; flex-direction: column; gap: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>IMF Calculator</h1>
+    <p>Diet setup per Lyle McDonald's <em>Intermittent Modified Fasting</em> — RFL days, maintenance days, and weekly patterns.</p>
+  </header>
+
+  <div class="grid">
+    <!-- ===================== INPUTS ===================== -->
+    <div class="card">
+      <h2>Your Numbers</h2>
+
+      <label>Units</label>
+      <div class="seg" id="unitSeg">
+        <button data-unit="lb" class="active">lb</button>
+        <button data-unit="kg">kg</button>
+      </div>
+
+      <label>Sex <span class="hint">(for body-fat category ranges)</span></label>
+      <div class="seg" id="sexSeg">
+        <button data-sex="male" class="active">Male</button>
+        <button data-sex="female">Female</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Bodyweight (<span class="unit-label">lb</span>)</label>
+          <input type="number" id="weightInput" value="200" min="60" step="1">
+        </div>
+        <div>
+          <label>Body fat %</label>
+          <input type="number" id="bfInput" value="22" min="4" max="60" step="0.5">
+        </div>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="dexaCheck">
+        <span>BF% comes from a DEXA scan <span class="hint">(reads ~3–6% higher)</span></span>
+      </div>
+
+      <label>Daily activity <span class="hint">(excluding formal exercise)</span></label>
+      <select id="activitySelect">
+        <option value="1.1">Inactive — desk job, &lt;5k steps (×1.1)</option>
+        <option value="1.2">Light — moderate walking, 5–10k steps (×1.2)</option>
+        <option value="1.3" selected>Moderate — busy/active, 10–20k steps (×1.3)</option>
+        <option value="1.5">High — hard labor, 20k+ steps (×1.5)</option>
+      </select>
+
+      <label>Training during the week <span class="hint">(sets protein)</span></label>
+      <select id="trainingSelect">
+        <option value="none">No formal exercise</option>
+        <option value="aerobic">Aerobic / HIIT</option>
+        <option value="weights" selected>Weight training</option>
+      </select>
+
+      <label>Exercise on a maintenance day</label>
+      <div class="row">
+        <div>
+          <select id="maintExSelect">
+            <option value="0">None</option>
+            <option value="0.2">Low-intensity aerobic</option>
+            <option value="0.3">Medium-intensity aerobic</option>
+            <option value="0.4">High-intensity aerobic</option>
+            <option value="0.3">HIIT</option>
+            <option value="0.1">Moderate weight training</option>
+            <option value="0.2" selected>Hard weight training</option>
+          </select>
+        </div>
+        <div>
+          <input type="number" id="maintExMins" value="60" min="0" max="360" step="15" title="minutes">
+        </div>
+      </div>
+      <p class="note" style="margin-top:4px">Right box = minutes per session.</p>
+
+      <label>Exercise on an RFL day</label>
+      <div class="row">
+        <div>
+          <select id="rflExSelect">
+            <option value="0" selected>None / rest day</option>
+            <option value="0.2">Low-intensity aerobic</option>
+            <option value="0.3">Medium-intensity aerobic</option>
+            <option value="0.1">Moderate weight training</option>
+          </select>
+        </div>
+        <div>
+          <input type="number" id="rflExMins" value="0" min="0" max="360" step="15" title="minutes">
+        </div>
+      </div>
+
+      <label>Maintenance-day fat intake</label>
+      <select id="fatLevelSelect">
+        <option value="0.25">Lower (0.25 g/lb · 0.55 g/kg)</option>
+        <option value="0.38" selected>Middle (0.38 g/lb · 0.84 g/kg)</option>
+        <option value="0.5">Higher (0.5 g/lb · 1.1 g/kg)</option>
+      </select>
+
+      <label>IMF pattern</label>
+      <select id="patternSelect">
+        <option value="6:1">6:1 — one RFL day/week (gentle / maintenance)</option>
+        <option value="5:2">5:2 — two RFL days (gradual fat loss)</option>
+        <option value="4:3" selected>4:3 ADF — alternate days (solid fat loss)</option>
+        <option value="3:4">3:4 ADF — alternate days, RFL-heavy</option>
+        <option value="2:5icr">2:5 ICR — RFL days clustered mid-week</option>
+        <option value="2:5">2:5 — RFL Mon–Fri, maintenance weekend</option>
+        <option value="1:6">1:6 — near-straight RFL (max fat loss)</option>
+      </select>
+    </div>
+
+    <!-- ===================== RESULTS ===================== -->
+    <div class="results-stack">
+      <div class="card">
+        <h2>Body Composition</h2>
+        <div class="stat-row">
+          <div class="stat"><div class="v" id="catOut">–</div><div class="l">Diet category</div></div>
+          <div class="stat"><div class="v" id="lbmOut">–</div><div class="l">Lean body mass</div></div>
+          <div class="stat"><div class="v" id="fatMassOut">–</div><div class="l">Fat mass</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>RFL Day <span class="tag rfl">the "fasting" day</span></h2>
+        <div class="stat-row">
+          <div class="stat big"><div class="v" id="proteinOut">–</div><div class="l">Protein (minimum)</div></div>
+          <div class="stat"><div class="v" id="rflCalsOut">–</div><div class="l">Est. calories</div></div>
+          <div class="stat"><div class="v" id="rflDeficitOut">–</div><div class="l">Est. daily deficit</div></div>
+          <div class="stat"><div class="v" id="rflLossOut">–</div><div class="l">Est. fat loss / RFL day</div></div>
+        </div>
+        <p class="note" id="efaNote">Plus <b>–</b> of combined EPA/DHA (fish oil), 3–4 cups (225–325 g) of vegetables,
+        and liberal salt/potassium (Lite-Salt). Leanest protein sources only; keep tag-along carbs and fats
+        to ~20 g each per day. No calorie target — protein is the target.</p>
+      </div>
+
+      <div class="card">
+        <h2>Maintenance Day <span class="tag maint">the "feasting" day</span></h2>
+        <div class="stat-row">
+          <div class="stat big"><div class="v" id="tdeeOut">–</div><div class="l">TDEE / calorie target</div></div>
+        </div>
+        <table class="macro-table">
+          <tr><th>Macro</th><th>Grams / day</th><th>Calories</th><th>Notes</th></tr>
+          <tr><td>Protein</td><td id="mProtein">–</td><td id="mProteinCal">–</td><td>same as RFL day</td></tr>
+          <tr><td>Fat</td><td id="mFat">–</td><td id="mFatCal">–</td><td id="mFatNote">–</td></tr>
+          <tr><td>Carbohydrate</td><td id="mCarb">–</td><td id="mCarbCal">–</td><td id="mCarbNote">whatever calories remain</td></tr>
+        </table>
+        <p class="note">Swap rule: 10 g fat ⇄ 25 g carbs (~100 cal). Keep protein, EFAs and vegetables identical to the RFL day and add carbs/fats on top — a modular diet.</p>
+      </div>
+
+      <div class="card">
+        <h2>Weekly Plan</h2>
+        <div class="week" id="weekOut"></div>
+        <div class="stat-row" style="margin-top:14px">
+          <div class="stat"><div class="v" id="weekRflOut">–</div><div class="l">RFL days / week</div></div>
+          <div class="stat big"><div class="v" id="weekLossOut">–</div><div class="l">Est. fat loss / week</div></div>
+          <div class="stat"><div class="v" id="weekDeficitOut">–</div><div class="l">Weekly deficit</div></div>
+        </div>
+        <p class="note">Days are placeholders — shuffle RFL/maintenance days freely around key workouts and
+        social life, as long as the weekly pattern holds. Put maintenance days on your hardest training days.</p>
+      </div>
+
+      <div class="disclaimer">
+        Estimates follow the charts in the book (BMR by category × activity multiplier; protein by category,
+        LBM and training; fat loss at ~3,500 cal/lb). Real-world results are always somewhat less than paper math.
+        This is not medical advice — very-low-calorie days aren't appropriate for everyone; check with a professional,
+        especially with any medical condition.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LB_PER_KG = 2.2046;
+
+  // protein g per lb of LBM: [none, aerobic, weights] by category
+  var PROTEIN_TABLE = {
+    1: { none: 1.0, aerobic: 1.25, weights: 1.5 },
+    2: { none: 0.8, aerobic: 0.9,  weights: 1.1 },
+    3: { none: 0.7, aerobic: 0.8,  weights: 0.9 }
+  };
+  // BMR cal/lb by category
+  var BMR_TABLE = { 1: 10, 2: 9, 3: 8 };
+  // category upper bounds for BF%: [cat1 max, cat2 max]
+  var CAT_BOUNDS = {
+    male:   { std: [15, 25], dexa: [19.5, 31] },
+    female: { std: [24, 34], dexa: [28.5, 39] }
+  };
+  var PATTERNS = {
+    "6:1":   ["M","M","M","M","M","M","R"],
+    "5:2":   ["M","M","M","M","M","R","R"],
+    "4:3":   ["M","R","M","R","M","R","M"],
+    "3:4":   ["M","R","M","R","M","R","R"],
+    "2:5icr":["M","R","R","R","M","R","R"],
+    "2:5":   ["R","R","R","R","R","M","M"],
+    "1:6":   ["R","R","R","R","R","R","M"]
+  };
+  var DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+  var state = { unit: "lb", sex: "male" };
+
+  function byId(id) { return document.getElementById(id); }
+
+  var weightInput = byId("weightInput");
+  var bfInput = byId("bfInput");
+  var dexaCheck = byId("dexaCheck");
+  var activitySelect = byId("activitySelect");
+  var trainingSelect = byId("trainingSelect");
+  var maintExSelect = byId("maintExSelect");
+  var maintExMins = byId("maintExMins");
+  var rflExSelect = byId("rflExSelect");
+  var rflExMins = byId("rflExMins");
+  var fatLevelSelect = byId("fatLevelSelect");
+  var patternSelect = byId("patternSelect");
+
+  function setupSeg(segId, attr, onChange) {
+    var segElement = byId(segId);
+    var buttons = segElement.querySelectorAll("button");
+    segElement.addEventListener("click", function (e) {
+      var btn = e.target.closest("button");
+      if (!btn) return;
+      buttons.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      onChange(btn.dataset[attr]);
+    });
+  }
+
+  setupSeg("unitSeg", "unit", function (u) {
+    var w = parseFloat(weightInput.value);
+    if (isFinite(w)) {
+      weightInput.value = (u === "kg")
+        ? Math.round(w / LB_PER_KG)
+        : Math.round(w * LB_PER_KG);
+    }
+    state.unit = u;
+    document.querySelectorAll(".unit-label").forEach(function (n) { n.textContent = u; });
+    calc();
+  });
+  setupSeg("sexSeg", "sex", function (s) { state.sex = s; calc(); });
+
+  [weightInput, bfInput, dexaCheck, activitySelect, trainingSelect,
+   maintExSelect, maintExMins, rflExSelect, rflExMins,
+   fatLevelSelect, patternSelect].forEach(function (el) {
+    el.addEventListener("input", calc);
+  });
+
+  function fmtWeight(lb) {
+    return state.unit === "kg"
+      ? (lb / LB_PER_KG).toFixed(1) + " kg"
+      : lb.toFixed(1) + " lb";
+  }
+  function fmtLoss(lb) {
+    return state.unit === "kg"
+      ? (lb / LB_PER_KG).toFixed(2) + " kg"
+      : lb.toFixed(2) + " lb";
+  }
+  function round5(n) { return Math.round(n / 5) * 5; }
+
+  function calc() {
+    var wRaw = parseFloat(weightInput.value);
+    var bf = parseFloat(bfInput.value);
+    if (!isFinite(wRaw) || !isFinite(bf) || wRaw <= 0 || bf <= 0 || bf >= 70) return;
+
+    var weightLb = state.unit === "kg" ? wRaw * LB_PER_KG : wRaw;
+    var lbmLb = weightLb * (1 - bf / 100);
+    var fatLb = weightLb - lbmLb;
+
+    // category
+    var bounds = CAT_BOUNDS[state.sex][dexaCheck.checked ? "dexa" : "std"];
+    var cat = bf <= bounds[0] ? 1 : (bf <= bounds[1] ? 2 : 3);
+
+    // protein
+    var proteinG = Math.round(lbmLb * PROTEIN_TABLE[cat][trainingSelect.value]);
+
+    // RFL day calories: protein*4 + ~250 for EFAs and tag-alongs
+    var rflCals = proteinG * 4 + 250;
+
+    // TDEEs
+    var baseMult = parseFloat(activitySelect.value);
+    var maintMult = baseMult +
+      parseFloat(maintExSelect.value) * (parseFloat(maintExMins.value) || 0) / 60;
+    var rflMult = baseMult +
+      parseFloat(rflExSelect.value) * (parseFloat(rflExMins.value) || 0) / 60;
+    var maintTdee = round5(BMR_TABLE[cat] * maintMult * weightLb);
+    var rflTdee = round5(BMR_TABLE[cat] * rflMult * weightLb);
+
+    var rflDeficit = Math.max(0, rflTdee - rflCals);
+    var rflLossLb = rflDeficit / 3500;
+
+    // maintenance macros
+    var fatPerLb = parseFloat(fatLevelSelect.value);
+    var fatG = Math.round(weightLb * fatPerLb);
+    var fatCal = fatG * 9;
+    var proteinCal = proteinG * 4;
+    var carbCal = Math.max(0, maintTdee - proteinCal - fatCal);
+    var carbG = Math.round(carbCal / 4);
+
+    // pattern
+    var days = PATTERNS[patternSelect.value];
+    var nRfl = days.filter(function (d) { return d === "R"; }).length;
+    var weekLossLb = rflLossLb * nRfl;
+    var weekDeficit = rflDeficit * nRfl;
+
+    // ---- render ----
+    byId("catOut").textContent = "Category " + cat;
+    byId("lbmOut").textContent = fmtWeight(lbmLb);
+    byId("fatMassOut").textContent = fmtWeight(fatLb);
+
+    byId("proteinOut").textContent = proteinG + " g";
+    byId("rflCalsOut").textContent = "~" + round5(rflCals) + " cal";
+    byId("rflDeficitOut").textContent = "~" + rflDeficit + " cal";
+    byId("rflLossOut").textContent = "~" + fmtLoss(rflLossLb);
+    byId("efaNote").innerHTML =
+      "Plus <b>" + (weightLb < 175 ? "1.8 g" : "3.0 g") + "</b> of combined EPA/DHA (fish oil), " +
+      "3–4 cups (225–325 g) of vegetables, and liberal salt/potassium (Lite-Salt). " +
+      "Leanest protein sources only; keep tag-along carbs and fats to ~20 g each per day. " +
+      "No calorie target — protein is the target.";
+
+    byId("tdeeOut").textContent = maintTdee + " cal";
+    byId("mProtein").textContent = proteinG + " g";
+    byId("mProteinCal").textContent = proteinCal + " cal";
+    byId("mFat").textContent = fatG + " g";
+    byId("mFatCal").textContent = fatCal + " cal";
+    byId("mFatNote").textContent = fatPerLb + " g/lb bodyweight";
+    byId("mCarb").textContent = carbG + " g";
+    byId("mCarbCal").textContent = Math.round(carbCal) + " cal";
+    byId("mCarbNote").textContent = (carbG / weightLb).toFixed(1) + " g/lb (" +
+      (carbG / (weightLb / LB_PER_KG)).toFixed(1) + " g/kg)";
+
+    var weekElement = byId("weekOut");
+    weekElement.innerHTML = "";
+    days.forEach(function (d, i) {
+      var dayElement = document.createElement("div");
+      dayElement.className = "day " + (d === "R" ? "rfl" : "maint");
+      dayElement.innerHTML = '<span class="dn">' + DAY_NAMES[i] + "</span>" +
+        (d === "R" ? "RFL" : "Maint");
+      weekElement.appendChild(dayElement);
+    });
+    byId("weekRflOut").textContent = nRfl;
+    byId("weekLossOut").textContent = "~" + fmtLoss(weekLossLb);
+    byId("weekDeficitOut").textContent = "~" + Math.round(weekDeficit).toLocaleString() + " cal";
+  }
+
+  calc();
+})();
+</script>
+</body>
+</html>
