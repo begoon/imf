@@ -46,6 +46,7 @@
   .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
   header h1 { margin: 8px 0 4px; font-size: 1.7rem; }
   header p { margin: 0 0 20px; color: var(--muted); }
+  a { color: var(--accent); }
   .grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
   @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
   .card {
@@ -105,13 +106,21 @@
     border-radius: 10px; font-size: 0.8rem; color: var(--muted);
   }
   .results-stack { display: flex; flex-direction: column; gap: 20px; }
+  .support-card { text-align: center; }
+  .support-card p { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+  .support-btn {
+    display: inline-block; padding: 10px 22px; border-radius: 10px;
+    background: var(--accent); color: #fff; font-weight: 700; font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .support-btn:hover { opacity: 0.9; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>IMF Calculator</h1>
-    <p>Diet setup per Lyle McDonald's <em>Intermittent Modified Fasting</em> — RFL days, maintenance days, and weekly patterns.</p>
+    <p>Diet setup per Lyle McDonald's <em><a href="https://store.bodyrecomposition.com/shop/intermittent-modified-fasting/" target="_blank" rel="noopener">Intermittent Modified Fasting</a></em> — RFL days, maintenance days, and weekly patterns. This calculator only covers the basics — <a href="https://store.bodyrecomposition.com/shop/intermittent-modified-fasting/" target="_blank" rel="noopener">get the book</a> for the full method.</p>
   </header>
 
   <div class="grid">
@@ -264,6 +273,12 @@
         social life, as long as the weekly pattern holds. Put maintenance days on your hardest training days.</p>
       </div>
 
+      <div class="card support-card" id="supportCard" hidden>
+        <h2>Enjoying the calculator?</h2>
+        <p>If it saved you some spreadsheet time, you can support the project — thank you! ❤️</p>
+        <a class="support-btn" id="supportButton" href="#" target="_blank" rel="noopener">☕ Support this project</a>
+      </div>
+
       <div class="disclaimer">
         Estimates follow the charts in the book (BMR by category × activity multiplier; protein by category,
         LBM and training; fat loss at ~3,500 cal/lb). Real-world results are always somewhat less than paper math.
@@ -277,6 +292,15 @@
 <script>
 (function () {
   "use strict";
+
+  // ---- Stripe support button -------------------------------------------
+  // Product: prod_V2FNom78lC4RPZ
+  // A product ID alone can't open a checkout from a static page. In the
+  // Stripe Dashboard open this product -> "Create payment link", then paste
+  // the resulting https://buy.stripe.com/... URL below. The button stays
+  // hidden until a link is set.
+  var STRIPE_PAYMENT_LINK = "https://buy.stripe.com/6oUaEX7DzaNt26b6dn8Ra02";
+  // -----------------------------------------------------------------------
 
   var LB_PER_KG = 2.2046;
 
@@ -446,6 +470,11 @@
     byId("weekRflOut").textContent = nRfl;
     byId("weekLossOut").textContent = "~" + fmtLoss(weekLossLb);
     byId("weekDeficitOut").textContent = "~" + Math.round(weekDeficit).toLocaleString() + " cal";
+  }
+
+  if (STRIPE_PAYMENT_LINK) {
+    byId("supportButton").href = STRIPE_PAYMENT_LINK;
+    byId("supportCard").hidden = false;
   }
 
   calc();
