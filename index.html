@@ -297,6 +297,7 @@
           <div class="stat"><div class="v" id="lbmOut">–</div><div class="l">Lean body mass</div></div>
           <div class="stat"><div class="v" id="fatMassOut">–</div><div class="l">Fat mass</div></div>
         </div>
+        <p class="note" id="cuspNote" hidden></p>
       </div>
 
       <div class="card">
@@ -520,6 +521,17 @@
     byId("catOut").textContent = "Category " + cat;
     byId("lbmOut").textContent = fmtWeight(lbmLb);
     byId("fatMassOut").textContent = fmtWeight(fatLb);
+
+    // cusp rule: within 1% BF above a boundary, the book suggests using
+    // the lower (leaner) category
+    var onCusp = cat > 1 && bf <= bounds[cat - 2] + 1;
+    var cuspNote = byId("cuspNote");
+    cuspNote.hidden = !onCusp;
+    if (onCusp) {
+      cuspNote.textContent = "You're on the cusp of Category " + (cat - 1) +
+        " — the book recommends that people on the cusp of a lower category use that " +
+        "lower category's setup instead.";
+    }
 
     byId("proteinOut").textContent = proteinG + " g";
     byId("rflCalsOut").textContent = "~" + round5(rflCals) + " cal";
