@@ -3,7 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IMF Calculator — Intermittent Modified Fasting</title>
+<title>IMF Calculator — Intermittent Modified Fasting Diet Setup (Lyle McDonald)</title>
+<meta name="description" content="Free calculator for Lyle McDonald's Intermittent Modified Fasting (IMF): RFL fasting-day protein and calories, maintenance-day TDEE and macros, and weekly 5:2 / alternate-day fasting patterns. No sign-up, lb/kg, mobile-friendly.">
+<link rel="canonical" href="https://demin.ws/imf/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://demin.ws/imf/">
+<meta property="og:title" content="IMF Calculator — Intermittent Modified Fasting Diet Setup">
+<meta property="og:description" content="Free companion calculator for Lyle McDonald's Intermittent Modified Fasting book: RFL and maintenance day calories, protein and macros, and weekly fasting patterns.">
+<meta property="og:image" content="https://demin.ws/imf/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="IMF Calculator — Intermittent Modified Fasting Diet Setup">
+<meta name="twitter:description" content="Free companion calculator for Lyle McDonald's Intermittent Modified Fasting book: RFL and maintenance day calories, protein and macros, and weekly fasting patterns.">
+<meta name="twitter:image" content="https://demin.ws/imf/og.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "IMF Calculator",
+  "url": "https://demin.ws/imf/",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free diet setup calculator for Lyle McDonald's Intermittent Modified Fasting (IMF): RFL day protein and calories, maintenance day TDEE and macros, and weekly fasting patterns (6:1, 5:2, alternate-day).",
+  "about": {
+    "@type": "Book",
+    "name": "Intermittent Modified Fasting",
+    "author": { "@type": "Person", "name": "Lyle McDonald" }
+  }
+}
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-48M1R9Z53V"></script>
 <script>
@@ -137,6 +167,11 @@
   }
   .support-btn:hover { opacity: 0.9; }
   .kofi-wrap { margin-top: 12px; }
+  .about { margin-top: 20px; }
+  .about h2 { margin: 0 0 8px; font-size: 1.05rem; }
+  .about h2 + p { margin-top: 0; }
+  .about p { font-size: 0.9rem; color: var(--muted); margin: 0 0 16px; }
+  .about p:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -320,6 +355,22 @@
       </div>
     </div>
   </div>
+
+  <section class="card about" aria-label="About Intermittent Modified Fasting">
+    <h2>What is Intermittent Modified Fasting?</h2>
+    <p>Intermittent Modified Fasting (IMF) is a flexible dieting framework from Lyle McDonald's 2026 book
+    <em><a href="https://store.bodyrecomposition.com/shop/intermittent-modified-fasting/" target="_blank" rel="noopener">Intermittent Modified Fasting</a></em>.
+    Instead of a fixed daily calorie deficit, you alternate two kinds of days: very-low-calorie <b>RFL days</b>
+    (a protein-sparing modified fast — lean protein, vegetables, and fish oil only, no calorie counting) and
+    <b>maintenance days</b> where you eat at your full maintenance calories (TDEE). Weekly patterns range from a
+    gentle 6:1 (one fasting day per week) through 5:2 and 4:3 alternate-day fasting up to near-continuous RFL.</p>
+    <h2>What does this calculator do?</h2>
+    <p>It runs the book's setup charts for you: your diet category from body fat percentage (with a DEXA
+    correction), the minimum protein target for RFL days, TDEE and full macros — protein, fat, and
+    carbohydrates — for maintenance days, plus estimated daily deficit and weekly fat loss for every IMF
+    pattern. Free, no sign-up, works in lb or kg on desktop and mobile. The calculator covers the basic setup
+    only — the book explains food choices, adjustments over time, refeeds, and when to move between patterns.</p>
+  </section>
 </div>
 
 <script>
