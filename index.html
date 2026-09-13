@@ -227,6 +227,10 @@
         <option value="1.3" selected>Moderate — busy/active, 10–20k steps (×1.3)</option>
         <option value="1.5">High — hard labor, 20k+ steps (×1.5)</option>
       </select>
+      <div class="check">
+        <input type="checkbox" id="tefCheck">
+        <span>Add 10% for the thermic effect of food (TEF) <span class="hint">(the official online calculator does; the book's examples don't)</span></span>
+      </div>
 
       <label>Training during the week <span class="hint">(sets protein)</span></label>
       <select id="trainingSelect">
@@ -349,8 +353,8 @@
       </div>
 
       <div class="disclaimer">
-        Estimates follow the charts in the book (BMR by category × activity multiplier; protein by category,
-        LBM and training; fat loss at ~3,500 cal/lb). Real-world results are always somewhat less than paper math.
+        Estimates follow the charts in the book (BMR by category × activity multiplier, optionally +10% for TEF
+        as in the official online calculator; protein by category, LBM and training; fat loss at ~3,500 cal/lb). Real-world results are always somewhat less than paper math.
         This is not medical advice — very-low-calorie days aren't appropriate for everyone; check with a professional,
         especially with any medical condition.
       </div>
@@ -421,6 +425,7 @@
   var bfInput = byId("bfInput");
   var dexaCheck = byId("dexaCheck");
   var activitySelect = byId("activitySelect");
+  var tefCheck = byId("tefCheck");
   var trainingSelect = byId("trainingSelect");
   var maintExSelect = byId("maintExSelect");
   var maintExMins = byId("maintExMins");
@@ -454,7 +459,7 @@
   });
   setupSeg("sexSeg", "sex", function (s) { state.sex = s; calc(); });
 
-  [weightInput, bfInput, dexaCheck, activitySelect, trainingSelect,
+  [weightInput, bfInput, dexaCheck, activitySelect, tefCheck, trainingSelect,
    maintExSelect, maintExMins, rflExSelect, rflExMins,
    fatLevelSelect, patternSelect].forEach(function (el) {
     el.addEventListener("input", calc);
@@ -491,8 +496,10 @@
     // RFL day calories: protein*4 + ~250 for EFAs and tag-alongs
     var rflCals = proteinG * 4 + 250;
 
-    // TDEEs
-    var baseMult = parseFloat(activitySelect.value);
+    // TDEEs. The official online calculator adds 10% of BMR for the
+    // thermic effect of food, i.e. +0.1 on the activity multiplier; the
+    // book's worked examples don't include it, so it's optional here.
+    var baseMult = parseFloat(activitySelect.value) + (tefCheck.checked ? 0.1 : 0);
     var maintMult = baseMult +
       parseFloat(maintExSelect.value) * (parseFloat(maintExMins.value) || 0) / 60;
     var rflMult = baseMult +

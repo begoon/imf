@@ -16,8 +16,10 @@ everything needed to set up an IMF diet following the charts in the book:
   body mass and training type; estimated calories, daily deficit, and fat loss
   per RFL day; fish oil (EPA/DHA) dose
 - **Maintenance day** ("feasting" day) — TDEE via the book's method (BMR by
-  category × activity and per-hour exercise multipliers), protein held equal to
-  the RFL day, fat at 0.25–0.5 g/lb, carbohydrates from the remaining calories
+  category × activity and per-hour exercise multipliers, with an optional +10%
+  for the thermic effect of food to match the official online calculator),
+  protein held equal to the RFL day, fat at 0.25–0.5 g/lb, carbohydrates from
+  the remaining calories
 - **Weekly plan** — a color-coded 7-day schedule for the chosen IMF pattern
   (6:1, 5:2, 4:3/3:4 alternate-day, ICR, 2:5, 1:6) with estimated weekly fat
   loss and total weekly deficit

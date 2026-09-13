@@ -36,6 +36,19 @@ Moderate Activity Level = 1.3 multiplier") uses the chart values.
 Observed effect: for a 200 lb Category 2 input, maintenance calories are
 2,700 here vs. 2,880 on the official calculator.
 
+Explanation (from Lyle's group, relayed on Reddit 2026-09-13): the official
+calculator adds 10% to account for the thermic effect of food (TEF). The
+observed numbers show this is 10% of BMR, not of TDEE: 200 lb × 9 cal/lb =
+1,800 cal BMR, and 1,800 × (1.3 + 0.2 exercise + 0.1 TEF) = 2,880, which
+matches the official result exactly (a 10% uplift on TDEE would give 2,970).
+In other words the official multipliers are the book's chart values plus 0.1.
+The book's worked examples do not include TEF.
+
+Update 2026-09-13: this calculator now has an "Add 10% for the thermic
+effect of food" checkbox. Off (default) it follows the book's charts; on, it
+adds 0.1 to the activity multiplier and reproduces the official calculator's
+calorie figures.
+
 ### Vegetable amount on RFL days
 
 - Book: "a maximum of 3-4 cups (225-325 g) steamed vegetables per day"
